@@ -1,54 +1,171 @@
-# StockSelection Crew
+# 📈 Stock Selection Agent
 
-Welcome to the StockSelection Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+> An autonomous multi-agent AI system that discovers, researches, and selects the best investment opportunities — and notifies you in real-time.
 
-## Installation
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
+[![CrewAI](https://img.shields.io/badge/CrewAI-1.9.3-brightgreen)](https://crewai.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![UV](https://img.shields.io/badge/Managed%20by-UV-purple)](https://docs.astral.sh/uv/)
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+---
 
-First, if you haven't already, install uv:
+## 🌟 Key Highlights
+
+- 🤖 **Hierarchical Multi-Agent Orchestration** — A dedicated Manager Agent (GPT-4o) coordinates and delegates tasks to specialized sub-agents, mimicking a real analyst team.
+- 🧠 **Persistent Memory System** — Three layers of memory (Long-Term, Short-Term, Entity) ensure the crew learns from past decisions and avoids recommending the same stock twice.
+- 🔍 **Real-Time News Intelligence** — Integrates with Serper (Google Search API) to scan the latest financial news and surface trending companies in any target sector.
+- 📊 **Structured Output with Pydantic** — Every agent output is validated with Pydantic schemas, ensuring clean, reliable, and machine-readable data at every step.
+- 🔔 **Instant Push Notifications** — Once the best stock is selected, a push notification is sent immediately to your phone via Pushover — no need to watch the terminal.
+- 🗂️ **Fully Configurable via YAML** — Swap agents, roles, goals, and tasks without touching Python code.
+- ⚡ **Fast Dependency Management with UV** — Reproducible environments with near-instant installs.
+
+---
+
+## 🏗️ Architecture
+
+The system follows a **hierarchical crew process** with four specialized agents:
+
+```
+┌─────────────────────────────────────────────┐
+│              Manager Agent (GPT-4o)         │
+│   Orchestrates, delegates, and supervises   │
+└──────────────┬──────────────────────────────┘
+               │
+       ┌───────┴──────────┐
+       ▼                  ▼
+┌──────────────┐   ┌───────────────────┐
+│  Trending    │   │   Financial       │
+│  Company     │──▶│   Researcher      │
+│  Finder      │   │   (GPT-4o-mini)   │
+│ (GPT-4o-mini)│   └────────┬──────────┘
+└──────────────┘            │
+                            ▼
+                   ┌─────────────────┐
+                   │  Stock Picker   │
+                   │ (GPT-4o-mini)   │
+                   │ + Push Notify   │
+                   └─────────────────┘
+```
+
+### 🔄 Workflow
+
+1. **Find Trending Companies** — Scans the web for 2–3 companies making news in the target sector.
+2. **Research Companies** — Deep-dives into each company's market position, outlook, and investment potential.
+3. **Pick Best Company** — Synthesizes research, selects the top candidate, and sends a push notification.
+
+### 🧠 Memory Architecture
+
+| Memory Type | Storage Backend | Purpose |
+|---|---|---|
+| Long-Term Memory | SQLite (`.db`) | Remembers past picks across sessions |
+| Short-Term Memory | RAG (OpenAI Embeddings) | Maintains context within the current session |
+| Entity Memory | RAG (OpenAI Embeddings) | Tracks key facts about companies and entities |
+
+---
+
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python `>=3.10, <3.14`
+- [UV](https://docs.astral.sh/uv/) package manager
+- API Keys for: OpenAI, Serper, and Pushover
+
+### 1. Install UV
 
 ```bash
 pip install uv
 ```
 
-Next, navigate to your project directory and install the dependencies:
+### 2. Clone & Install Dependencies
 
-(Optional) Lock the dependencies and install them by using the CLI command:
 ```bash
+git clone https://github.com/your-username/stock-selection-agent.git
+cd stock_selection
 crewai install
 ```
-### Customizing
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+### 3. Configure Environment Variables
 
-- Modify `src/stock_selection/config/agents.yaml` to define your agents
-- Modify `src/stock_selection/config/tasks.yaml` to define your tasks
-- Modify `src/stock_selection/crew.py` to add your own logic, tools and specific args
-- Modify `src/stock_selection/main.py` to add custom inputs for your agents and tasks
+Create a `.env` file in the project root:
 
-## Running the Project
+```env
+# LLM Provider
+OPENAI_API_KEY=your_openai_api_key
 
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
+# Search Tool (https://serper.dev)
+SERPER_API_KEY=your_serper_api_key
 
-```bash
-$ crewai run
+# Push Notifications (https://pushover.net)
+PUSHOVER_USER=your_pushover_user_key
+PUSHOVER_TOKEN=your_pushover_app_token
 ```
 
-This command initializes the stock_selection Crew, assembling the agents and assigning them tasks as defined in your configuration.
+### 4. Run the Agent
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+```bash
+uv run stock_selection
+```
 
-## Understanding Your Crew
+Or using the crewAI CLI:
 
-The stock_selection Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+```bash
+crewai run
+```
 
-## Support
+---
 
-For support, questions, or feedback regarding the StockSelection Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
+## ⚙️ Configuration
 
-Let's create wonders together with the power and simplicity of crewAI.
+### Changing the Target Sector
+
+Edit `src/stock_selection/main.py` and update the `sector` input:
+
+```python
+inputs = {
+    'sector': 'Healthcare',   # e.g., Technology, Energy, Finance
+    "current_date": str(datetime.now())
+}
+```
+
+### Customizing Agents
+
+Edit `src/stock_selection/config/agents.yaml` to change agent roles, goals, backstories, or LLM models.
+
+### Customizing Tasks
+
+Edit `src/stock_selection/config/tasks.yaml` to modify task descriptions, expected outputs, or output file paths.
+
+---
+
+## 📤 Outputs
+
+After each run, the following files are generated in the `output/` directory:
+
+| File | Description |
+|---|---|
+| `trending_companies.json` | List of trending companies with tickers and reasons |
+| `research_report.json` | Detailed analysis of each company |
+| `decision.md` | Final investment recommendation with full rationale |
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| Agent Framework | [CrewAI](https://crewai.com) v1.9.3 |
+| LLM Models | OpenAI GPT-4o / GPT-4o-mini |
+| Search | [Serper Dev](https://serper.dev) (Google Search API) |
+| Push Notifications | [Pushover](https://pushover.net) |
+| Memory (RAG) | OpenAI `text-embedding-3-small` |
+| Memory (Long-Term) | SQLite via `LTMSQLiteStorage` |
+| Data Validation | Pydantic v2 |
+| Package Manager | [UV](https://docs.astral.sh/uv/) |
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
